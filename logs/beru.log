@@ -1,0 +1,13 @@
+2026-02-19 16:16:01,240 - beru.plugins - INFO - Discovered 0 plugin files
+2026-02-19 16:16:01,245 - beru.plugins - INFO - Loaded 0 tools from 0 plugin files
+2026-02-19 16:16:01,246 - beru - INFO - Loaded agents: ['file_agent', 'terminal_agent', 'orchestrator']
+2026-02-19 16:16:01,247 - beru.agents.orchestrator - INFO - Loaded specialized agent: file_agent
+2026-02-19 16:16:01,247 - beru.agents.orchestrator - INFO - Loaded specialized agent: terminal_agent
+2026-02-19 16:18:45,297 - beru.agent.terminal_agent - ERROR - Tool execution failed: run_script - RunScriptTool.execute() missing 1 required positional argument: 'script_path'
+2026-02-19 16:20:03,074 - beru.agent.terminal_agent - ERROR - Tool execution failed: run_script - RunScriptTool.execute() missing 1 required positional argument: 'script_path'
+2026-02-19 16:54:26,957 - beru.plugins - INFO - Discovered 0 plugin files
+2026-02-19 16:54:26,957 - beru.plugins - INFO - Loaded 0 tools from 0 plugin files
+2026-02-19 16:54:26,959 - beru - INFO - Loaded agents: ['file_agent', 'terminal_agent', 'orchestrator']
+2026-02-19 17:51:07,990 - beru.plugins - INFO - Discovered 0 plugin files
+2026-02-19 17:51:07,990 - beru.plugins - INFO - Loaded 0 tools from 0 plugin files
+2026-02-19 17:51:07,993 - beru - INFO - Loaded agents: ['file_agent', 'terminal_agent', 'orchestrator']
