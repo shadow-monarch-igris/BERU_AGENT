@@ -297,6 +297,40 @@ api:
 ```
 
 ---
+# 🔮 Future Enhancements
+
+BERU is designed with extensibility in mind.  
+Upcoming enhancements focus on **enterprise-grade security, deeper automation, and production-readiness.**
+
+---
+
+## 🛡️ Security Hardening Agent (Security Specialist)
+
+A dedicated **`security_agent`** designed to ensure that every project built or modified by BERU is secure by default.
+
+This agent will function as a **Security Specialist** inside the multi-agent ecosystem.
+
+---
+
+### 🎯 Purpose
+
+- Automatically scan projects for vulnerabilities
+- Enforce secure coding standards
+- Perform security audits
+- Generate risk reports
+- Suggest and optionally apply fixes
+
+Security becomes part of the workflow — not an afterthought.
+
+---
+
+## 🔍 Planned Capabilities
+### 1️⃣ SAST (Static Application Security Testing)
+### 2️⃣ DAST (Dynamic Application Security Testing)
+### 3️⃣ Dependency & Supply Chain Analysis
+### 4️⃣ Secure Project Scaffolding
+### 5️⃣ DevSecOps Integration
+### 6️⃣ Risk Scoring & Reporting
 
 # 🧬 Project Structure
 
