@@ -150,44 +150,34 @@ class TerminalAgent(BaseAgent):
     async def think(self, input_text: str) -> Dict[str, Any]:
         from beru.utils.helpers import extract_json
 
-        # Check for simple greetings
-        simple_greetings = [
-            "hi",
-            "hello",
-            "hlo",
-            "hey",
-            "how are you",
-            "what can you do",
-            "help",
-        ]
-        if (
-            any(g in input_text.lower().strip() for g in simple_greetings)
-            and len(input_text.split()) < 5
-        ):
-            return {
-                "action": "answer",
-                "final_answer": "Hello! I'm BERU's Terminal Agent. I can execute shell commands safely. What would you like me to run?",
-            }
+        prompt = f"""You are BERU's Terminal Agent - a helpful AI assistant specialized in terminal/command execution.
 
-        prompt = f"""You are a terminal command executor. Be safe and careful.
+User request: {input_text}
 
-User: {input_text}
+Available tools (use the EXACT action name shown):
+- action: "execute_command" - Execute a shell command (params: {{"command": "ls -la", "timeout": 60}})
+- action: "run_script" - Run a Python or shell script (params: {{"script_path": "path", "args": "arguments"}})
 
-Available tools:
-- execute_command: needs command and timeout (optional)
-- run_script: needs script_path and args (optional)
+IMPORTANT RULES:
+1. For general conversation/greetings WITHOUT terminal tasks: use action "answer"
+2. For terminal-related tasks: use the EXACT action name from the list above
+3. Be friendly and helpful
+4. Safety: NEVER run dangerous commands (rm -rf /, sudo rm, mkfs, dd)
 
-Safety rules:
-- NEVER run: rm -rf, sudo, mkfs, dd
-- Always use safe commands
+RESPOND WITH ONLY ONE OF THESE JSON FORMATS:
 
-Respond in JSON:
-{{"action": "tool_name", "action_input": {{"param": "value"}}}}
-OR:
-{{"action": "answer", "final_answer": "your response"}}"""
+For conversation:
+{{"action": "answer", "final_answer": "Your friendly response here"}}
+
+For terminal operations (examples):
+{{"action": "execute_command", "action_input": {{"command": "pwd"}}}}
+{{"action": "execute_command", "action_input": {{"command": "ls -la", "timeout": 30}}}}
+{{"action": "run_script", "action_input": {{"script_path": "/path/to/script.py"}}}}
+
+JSON response:"""
 
         try:
-            response = await self.llm.generate(prompt, max_tokens=200, temperature=0.1)
+            response = await self.llm.generate(prompt, max_tokens=500, temperature=0.3)
             parsed = extract_json(response.text)
             if not parsed:
                 parsed = {

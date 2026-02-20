@@ -1,6 +1,13 @@
+"""
+Enhanced File Agent for BERU
+Complete file operations with additional capabilities
+"""
+
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Type
+import subprocess
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from beru.core.agent import BaseAgent, AgentFactory, agent
 from beru.core.llm import get_llm_client
@@ -18,13 +25,13 @@ class ReadFileTool(Tool):
         ToolParameter(
             name="file_path",
             type="string",
-            description="Path to the file to read",
+            description="Path to the file",
             required=True,
         ),
     ]
 
-    async def execute(self, file_path: str, **kwargs) -> ToolResult:
-        from pathlib import Path
+    async def execute(self, **kwargs) -> ToolResult:
+        file_path = kwargs.get("file_path")
         from beru.safety import get_safety_manager
 
         safety = get_safety_manager()
@@ -47,27 +54,25 @@ class ReadFileTool(Tool):
 
 class WriteFileTool(Tool):
     name = "write_file"
-    description = "Write content to a file, creating it if necessary"
+    description = "Write content to a file"
     tool_type = ToolType.FILE
     parameters = [
         ToolParameter(
             name="file_path",
             type="string",
-            description="Path to the file to write",
+            description="Path to the file",
             required=True,
         ),
         ToolParameter(
-            name="content",
-            type="string",
-            description="Content to write to the file",
-            required=True,
+            name="content", type="string", description="Content to write", required=True
         ),
     ]
     dangerous = True
     requires_confirmation = True
 
-    async def execute(self, file_path: str, content: str, **kwargs) -> ToolResult:
-        from pathlib import Path
+    async def execute(self, **kwargs) -> ToolResult:
+        file_path = kwargs.get("file_path")
+        content = kwargs.get("content", "")
         from beru.safety import get_safety_manager
 
         safety = get_safety_manager()
@@ -82,8 +87,8 @@ class WriteFileTool(Tool):
             path.write_text(content, encoding="utf-8")
             return ToolResult(
                 success=True,
-                output=f"Successfully wrote {len(content)} characters to {path}",
-                metadata={"path": str(path), "size": len(content)},
+                output=f"Wrote {len(content)} chars to {path}",
+                metadata={"path": str(path)},
             )
         except Exception as e:
             return ToolResult(success=False, output=None, error=str(e))
@@ -97,26 +102,22 @@ class ListDirectoryTool(Tool):
         ToolParameter(
             name="directory",
             type="string",
-            description="Path to the directory to list",
+            description="Path to directory",
             required=False,
             default=".",
         ),
         ToolParameter(
             name="recursive",
             type="boolean",
-            description="Whether to list recursively",
+            description="List recursively",
             required=False,
             default=False,
         ),
     ]
 
-    async def execute(
-        self,
-        directory: str = ".",
-        recursive: bool = False,
-        **kwargs,
-    ) -> ToolResult:
-        from pathlib import Path
+    async def execute(self, **kwargs) -> ToolResult:
+        directory = kwargs.get("directory", ".")
+        recursive = kwargs.get("recursive", False)
         from beru.safety import get_safety_manager
 
         safety = get_safety_manager()
@@ -127,14 +128,10 @@ class ListDirectoryTool(Tool):
 
         try:
             path = Path(validation.sanitized or directory)
-
-            if recursive:
-                items = list(path.rglob("*"))
-            else:
-                items = list(path.iterdir())
+            items = list(path.rglob("*")) if recursive else list(path.iterdir())
 
             result = []
-            for item in items[:1000]:
+            for item in items[:500]:
                 result.append(
                     {
                         "name": item.name,
@@ -145,9 +142,7 @@ class ListDirectoryTool(Tool):
                 )
 
             return ToolResult(
-                success=True,
-                output=result,
-                metadata={"count": len(result), "truncated": len(items) > 1000},
+                success=True, output=result, metadata={"count": len(result)}
             )
         except Exception as e:
             return ToolResult(success=False, output=None, error=str(e))
@@ -159,17 +154,14 @@ class DeleteFileTool(Tool):
     tool_type = ToolType.FILE
     parameters = [
         ToolParameter(
-            name="file_path",
-            type="string",
-            description="Path to the file or directory to delete",
-            required=True,
+            name="file_path", type="string", description="Path to delete", required=True
         ),
     ]
     dangerous = True
     requires_confirmation = True
 
-    async def execute(self, file_path: str, **kwargs) -> ToolResult:
-        from pathlib import Path
+    async def execute(self, **kwargs) -> ToolResult:
+        file_path = kwargs.get("file_path")
         import shutil
         from beru.safety import get_safety_manager
 
@@ -181,89 +173,42 @@ class DeleteFileTool(Tool):
 
         try:
             path = Path(validation.sanitized or file_path)
-
             if path.is_file():
                 path.unlink()
             elif path.is_dir():
                 shutil.rmtree(path)
-
-            return ToolResult(
-                success=True,
-                output=f"Successfully deleted {path}",
-                metadata={"path": str(path)},
-            )
+            return ToolResult(success=True, output=f"Deleted {path}")
         except Exception as e:
             return ToolResult(success=False, output=None, error=str(e))
 
 
 class CreateDirectoryTool(Tool):
     name = "create_directory"
-    description = "Create a new directory/folder"
+    description = "Create a new directory"
     tool_type = ToolType.FILE
     parameters = [
         ToolParameter(
             name="directory_path",
             type="string",
-            description="Path of the directory to create",
+            description="Path to create",
             required=True,
         ),
     ]
 
-    def _resolve_path(self, path: str) -> "Path":
-        """Resolve path, handling user directory names"""
-        from pathlib import Path
-        import os
-
-        # Common user directories
-        home = Path.home()
-        user_dirs = {
-            "downloads": home / "Downloads",
-            "documents": home / "Documents",
-            "desktop": home / "Desktop",
-            "pictures": home / "Pictures",
-            "videos": home / "Videos",
-            "music": home / "Music",
-        }
-
-        path = path.strip()
-
-        # Already absolute path
-        if path.startswith("/") or path.startswith("~"):
-            return Path(path).expanduser().resolve()
-
-        # Check if it's a user directory name
-        path_lower = path.lower()
-        for dir_name, dir_path in user_dirs.items():
-            if path_lower == dir_name or path_lower.startswith(dir_name + "/"):
-                # Replace the directory name with absolute path
-                remaining = (
-                    path[len(dir_name) :] if path.lower().startswith(dir_name) else ""
-                )
-                return (dir_path / remaining.lstrip("/")).resolve()
-
-        # Relative path - resolve from current directory
-        return Path(path).resolve()
-
-    async def execute(self, directory_path: str, **kwargs) -> ToolResult:
-        from pathlib import Path
+    async def execute(self, **kwargs) -> ToolResult:
+        directory_path = kwargs.get("directory_path")
         from beru.safety import get_safety_manager
 
+        safety = get_safety_manager()
+        validation = safety.validate_path(directory_path)
+
+        if not validation.allowed:
+            return ToolResult(success=False, output=None, error=validation.reason)
+
         try:
-            # Resolve the path first
-            resolved_path = self._resolve_path(directory_path)
-
-            safety = get_safety_manager()
-            validation = safety.validate_path(str(resolved_path))
-
-            if not validation.allowed:
-                return ToolResult(success=False, output=None, error=validation.reason)
-
-            resolved_path.mkdir(parents=True, exist_ok=True)
-            return ToolResult(
-                success=True,
-                output=f"Created directory: {resolved_path}",
-                metadata={"path": str(resolved_path)},
-            )
+            path = Path(validation.sanitized or directory_path)
+            path.mkdir(parents=True, exist_ok=True)
+            return ToolResult(success=True, output=f"Created directory: {path}")
         except Exception as e:
             return ToolResult(success=False, output=None, error=str(e))
 
@@ -276,25 +221,21 @@ class SearchFilesTool(Tool):
         ToolParameter(
             name="pattern",
             type="string",
-            description="Glob pattern to search for (e.g., '*.py')",
+            description="Glob pattern (e.g., '*.py')",
             required=True,
         ),
         ToolParameter(
             name="directory",
             type="string",
-            description="Directory to search in",
+            description="Directory to search",
             required=False,
             default=".",
         ),
     ]
 
-    async def execute(
-        self,
-        pattern: str,
-        directory: str = ".",
-        **kwargs,
-    ) -> ToolResult:
-        from pathlib import Path
+    async def execute(self, **kwargs) -> ToolResult:
+        pattern = kwargs.get("pattern", "*")
+        directory = kwargs.get("directory", ".")
         from beru.safety import get_safety_manager
 
         safety = get_safety_manager()
@@ -325,10 +266,168 @@ class SearchFilesTool(Tool):
             return ToolResult(success=False, output=None, error=str(e))
 
 
+class SummarizeFolderTool(Tool):
+    name = "summarize_folder"
+    description = "Generate summary of folder contents"
+    tool_type = ToolType.FILE
+    parameters = [
+        ToolParameter(
+            name="directory", type="string", description="Path to folder", required=True
+        ),
+    ]
+
+    async def execute(self, **kwargs) -> ToolResult:
+        directory = kwargs.get("directory")
+        from beru.safety import get_safety_manager
+
+        safety = get_safety_manager()
+        validation = safety.validate_path(directory, must_exist=True)
+
+        if not validation.allowed:
+            return ToolResult(success=False, output=None, error=validation.reason)
+
+        try:
+            path = Path(validation.sanitized or directory)
+
+            total_files = 0
+            total_dirs = 0
+            total_size = 0
+            file_types = {}
+
+            for item in path.rglob("*"):
+                if item.is_file():
+                    total_files += 1
+                    total_size += item.stat().st_size
+                    ext = item.suffix.lower() or "no_extension"
+                    file_types[ext] = file_types.get(ext, 0) + 1
+                elif item.is_dir():
+                    total_dirs += 1
+
+            summary = {
+                "path": str(path),
+                "total_files": total_files,
+                "total_directories": total_dirs,
+                "total_size_mb": round(total_size / (1024 * 1024), 2),
+                "file_types": dict(
+                    sorted(file_types.items(), key=lambda x: x[1], reverse=True)[:10]
+                ),
+            }
+
+            return ToolResult(
+                success=True, output=summary, metadata={"path": str(path)}
+            )
+        except Exception as e:
+            return ToolResult(success=False, output=None, error=str(e))
+
+
+class OpenInAppTool(Tool):
+    name = "open_in_app"
+    description = "Open file/folder in an application"
+    tool_type = ToolType.FILE
+    parameters = [
+        ToolParameter(
+            name="path", type="string", description="Path to open", required=True
+        ),
+        ToolParameter(
+            name="app",
+            type="string",
+            description="Application (code, vim, firefox)",
+            required=False,
+            default="code",
+        ),
+    ]
+
+    async def execute(self, **kwargs) -> ToolResult:
+        path = kwargs.get("path")
+        app = kwargs.get("app", "code")
+        from beru.safety import get_safety_manager
+
+        safety = get_safety_manager()
+        validation = safety.validate_path(path, must_exist=True)
+
+        if not validation.allowed:
+            return ToolResult(success=False, output=None, error=validation.reason)
+
+        try:
+            resolved_path = Path(validation.sanitized or path)
+
+            app_commands = {
+                "code": ["code", str(resolved_path)],
+                "vscode": ["code", str(resolved_path)],
+                "vim": ["vim", str(resolved_path)],
+                "nano": ["nano", str(resolved_path)],
+                "firefox": ["firefox", str(resolved_path)],
+                "chrome": ["google-chrome", str(resolved_path)],
+                "files": ["nautilus", str(resolved_path)],
+                "terminal": [
+                    "gnome-terminal",
+                    "--working-directory",
+                    str(resolved_path),
+                ],
+            }
+
+            cmd = app_commands.get(app.lower(), [app, str(resolved_path)])
+            subprocess.Popen(cmd, start_new_session=True)
+
+            return ToolResult(success=True, output=f"Opened {resolved_path} in {app}")
+        except Exception as e:
+            return ToolResult(success=False, output=None, error=str(e))
+
+
+class UpdateFileTool(Tool):
+    name = "update_file"
+    description = "Update an existing file by appending or replacing content"
+    tool_type = ToolType.FILE
+    parameters = [
+        ToolParameter(
+            name="file_path", type="string", description="Path to file", required=True
+        ),
+        ToolParameter(
+            name="content",
+            type="string",
+            description="Content to add/replace",
+            required=True,
+        ),
+        ToolParameter(
+            name="mode",
+            type="string",
+            description="Mode: append or replace",
+            required=False,
+            default="append",
+        ),
+    ]
+    dangerous = True
+
+    async def execute(self, **kwargs) -> ToolResult:
+        file_path = kwargs.get("file_path")
+        content = kwargs.get("content", "")
+        mode = kwargs.get("mode", "append")
+        from beru.safety import get_safety_manager
+
+        safety = get_safety_manager()
+        validation = safety.validate_path(file_path, must_exist=True)
+
+        if not validation.allowed:
+            return ToolResult(success=False, output=None, error=validation.reason)
+
+        try:
+            path = Path(validation.sanitized or file_path)
+
+            if mode == "replace":
+                path.write_text(content, encoding="utf-8")
+            else:
+                with open(path, "a") as f:
+                    f.write("\n" + content)
+
+            return ToolResult(success=True, output=f"Updated {path}")
+        except Exception as e:
+            return ToolResult(success=False, output=None, error=str(e))
+
+
 @agent
 class FileAgent(BaseAgent):
     name = "file_agent"
-    description = "Agent specialized in file system operations"
+    description = "Enhanced agent for file system operations"
     agent_type = "file"
     tools = [
         ReadFileTool,
@@ -337,6 +436,9 @@ class FileAgent(BaseAgent):
         CreateDirectoryTool,
         DeleteFileTool,
         SearchFilesTool,
+        SummarizeFolderTool,
+        OpenInAppTool,
+        UpdateFileTool,
     ]
 
     def __init__(self, agent_id: Optional[str] = None):
@@ -346,60 +448,46 @@ class FileAgent(BaseAgent):
     async def think(self, input_text: str) -> Dict[str, Any]:
         from beru.utils.helpers import extract_json
 
-        # Check for simple greetings or non-tool queries
-        simple_greetings = [
-            "hi",
-            "hello",
-            "hlo",
-            "hey",
-            "how are you",
-            "what can you do",
-            "help",
-        ]
-        if (
-            any(g in input_text.lower().strip() for g in simple_greetings)
-            and len(input_text.split()) < 5
-        ):
-            return {
-                "action": "answer",
-                "final_answer": "Hello! I'm BERU's File Agent. I can help you with:\n- Reading and writing files\n- Listing directories\n- Searching for files\n- Managing your files safely\n\nWhat would you like me to do?",
-            }
+        prompt = f"""You are BERU's File Agent - a helpful AI assistant for file operations.
 
-        prompt = f"""User request: {input_text}
+User request: {input_text}
 
-Tools (respond with JSON to use one):
-- create_directory(directory_path) - Create a folder
-- list_directory(directory) - List folder contents  
-- read_file(file_path) - Read a file
-- write_file(file_path, content) - Write to file
-- delete_file(file_path) - Delete file
-- search_files(pattern, directory) - Find files
+Available tools (use EXACT action name):
+- action: "read_file" (params: {{"file_path": "path"}})
+- action: "write_file" (params: {{"file_path": "path", "content": "text"}})
+- action: "update_file" (params: {{"file_path": "path", "content": "text", "mode": "append|replace"}})
+- action: "list_directory" (params: {{"directory": "path", "recursive": false}})
+- action: "create_directory" (params: {{"directory_path": "path"}})
+- action: "delete_file" (params: {{"file_path": "path"}})
+- action: "search_files" (params: {{"pattern": "*.py", "directory": "path"}})
+- action: "summarize_folder" (params: {{"directory": "path"}})
+- action: "open_in_app" (params: {{"path": "path", "app": "code"}})
 
-IMPORTANT: 
-- Respond with ONLY valid JSON, no explanation
-- Use the EXACT path: /home/user171125/Downloads NOT /home/user/Downloads
-- For Downloads use: /home/user171125/Downloads
-- For Documents use: /home/user171125/Documents
-- Example: {{"action": "create_directory", "action_input": {{"directory_path": "/home/user171125/Downloads/igris"}}}}
+IMPORTANT:
+- Use actual paths: /home/user171125/Downloads, /home/user171125/Documents
+- For conversation: use action "answer"
+- For file tasks: use appropriate tool
+
+Respond ONLY with valid JSON:
+{{"action": "answer", "final_answer": "your response"}}
+OR
+{{"action": "tool_name", "action_input": {{"param": "value"}}}}
 
 JSON response:"""
 
         try:
-            response = await self.llm.generate(prompt, max_tokens=200, temperature=0.1)
+            response = await self.llm.generate(prompt, max_tokens=500, temperature=0.3)
             parsed = extract_json(response.text)
             if not parsed:
                 parsed = {
                     "action": "answer",
                     "final_answer": response.text[:500]
                     if response.text
-                    else "I'm not sure how to help with that.",
+                    else "I'm not sure.",
                 }
             return parsed
         except Exception as e:
-            return {
-                "action": "answer",
-                "final_answer": f"I encountered an error: {e}. Please try again.",
-            }
+            return {"action": "answer", "final_answer": f"Error: {e}"}
 
     async def act(self, thought: Dict[str, Any]) -> ToolResult:
         action = thought.get("action", "answer")
@@ -407,15 +495,12 @@ JSON response:"""
 
         if action == "answer":
             return ToolResult(
-                success=True,
-                output=thought.get("final_answer", str(action_input)),
+                success=True, output=thought.get("final_answer", str(action_input))
             )
 
         if isinstance(action_input, str):
             return ToolResult(
-                success=False,
-                output=None,
-                error=f"Tool parameters must be an object",
+                success=False, output=None, error="Tool parameters must be an object"
             )
 
         return await self.execute_tool(action, **action_input)

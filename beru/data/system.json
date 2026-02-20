@@ -1,0 +1,171 @@
+{
+  "scan_date": "2026-02-20T13:13:10.273448",
+  "system": {
+    "os": "Linux",
+    "distro": "Ubuntu 24.04.3 LTS\"\n",
+    "hostname": "user171125-MS-7E44",
+    "username": "user171125",
+    "home_dir": "/home/user171125",
+    "shell": "/bin/bash"
+  },
+  "installed_apps": {
+    "editors": [
+      {
+        "name": "code",
+        "path": "/usr/bin/code",
+        "version": "1.107.0"
+      },
+      {
+        "name": "vim",
+        "path": "/usr/bin/vim",
+        "version": "VIM - Vi IMproved 9.1 (2024 Jan 02, compiled Sep 05 2025 19:"
+      },
+      {
+        "name": "nano",
+        "path": "/usr/bin/nano",
+        "version": "GNU nano, version 7.2"
+      },
+      {
+        "name": "subl",
+        "path": "/usr/bin/subl",
+        "version": "Sublime Text Build 4200"
+      }
+    ],
+    "browsers": [
+      {
+        "name": "firefox",
+        "path": "/usr/bin/firefox",
+        "version": "Mozilla Firefox 147.0.4"
+      },
+      {
+        "name": "google-chrome",
+        "path": "/usr/bin/google-chrome",
+        "version": "Google Chrome 143.0.7499.109"
+      }
+    ],
+    "terminals": [
+      {
+        "name": "gnome-terminal",
+        "path": "/usr/bin/gnome-terminal",
+        "version": "# GNOME Terminal 3.52.0 using VTE 0.76.0 +BIDI +GNUTLS +ICU "
+      },
+      {
+        "name": "xterm",
+        "path": "/usr/bin/xterm",
+        "version": ""
+      }
+    ],
+    "tools": [
+      {
+        "name": "git",
+        "path": "/usr/bin/git",
+        "version": "git version 2.43.0"
+      },
+      {
+        "name": "python3",
+        "path": "/home/user171125/miniconda3/bin/python3",
+        "version": "Python 3.13.9"
+      },
+      {
+        "name": "python",
+        "path": "/home/user171125/miniconda3/bin/python",
+        "version": "Python 3.13.9"
+      },
+      {
+        "name": "node",
+        "path": "/usr/bin/node",
+        "version": "v22.22.0"
+      },
+      {
+        "name": "npm",
+        "path": "/usr/bin/npm",
+        "version": "10.9.4"
+      },
+      {
+        "name": "pip",
+        "path": "/home/user171125/miniconda3/bin/pip",
+        "version": "pip 25.2 from /home/user171125/miniconda3/lib/python3.13/sit"
+      },
+      {
+        "name": "pip3",
+        "path": "/home/user171125/miniconda3/bin/pip3",
+        "version": "pip 25.2 from /home/user171125/miniconda3/lib/python3.13/sit"
+      }
+    ]
+  },
+  "languages": {
+    "python": {
+      "version": "3.13.9",
+      "path": "/home/user171125/miniconda3/bin/python3",
+      "packages_count": 266
+    },
+    "node": {
+      "version": "22.22.0",
+      "path": "/usr/bin/node"
+    }
+  },
+  "directories": {
+    "home": {
+      "path": "/home/user171125",
+      "exists": true,
+      "items_count": 83
+    },
+    "downloads": {
+      "path": "/home/user171125/Downloads",
+      "exists": true,
+      "items_count": 97
+    },
+    "documents": {
+      "path": "/home/user171125/Documents",
+      "exists": true,
+      "items_count": 53
+    },
+    "desktop": {
+      "path": "/home/user171125/Desktop",
+      "exists": true,
+      "items_count": 0
+    },
+    "pictures": {
+      "path": "/home/user171125/Pictures",
+      "exists": true,
+      "items_count": 1
+    },
+    "music": {
+      "path": "/home/user171125/Music",
+      "exists": true,
+      "items_count": 2
+    },
+    "videos": {
+      "path": "/home/user171125/Videos",
+      "exists": true,
+      "items_count": 0
+    }
+  },
+  "recent_projects": [
+    {
+      "name": "AI_Database_Manager (AGENTIC_AI--> langgraph)",
+      "path": "/home/user171125/Documents/AI_Database_Manager (AGENTIC_AI--> langgraph)",
+      "type": "python"
+    },
+    {
+      "name": "AI Food Nutrition & Health Analyzer",
+      "path": "/home/user171125/Documents/AI Food Nutrition & Health Analyzer",
+      "type": "unknown"
+    },
+    {
+      "name": "cnn_model",
+      "path": "/home/user171125/Documents/cnn_model",
+      "type": "unknown"
+    },
+    {
+      "name": "gemma_agent",
+      "path": "/home/user171125/Documents/gemma_agent",
+      "type": "python"
+    },
+    {
+      "name": "AI_Database_Engineer",
+      "path": "/home/user171125/Downloads/AI_Database_Engineer",
+      "type": "python"
+    }
+  ]
+}
