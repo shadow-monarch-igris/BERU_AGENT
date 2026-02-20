@@ -1,4 +1,4 @@
-# BERU 2.0 - Dream AI Assistant
+# BERU AI Assistant Available For Your Help 
 
 Your personal AI assistant with comprehensive capabilities for file management, coding, web operations, project scaffolding, and more.
 
