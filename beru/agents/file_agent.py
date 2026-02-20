@@ -448,30 +448,57 @@ class FileAgent(BaseAgent):
     async def think(self, input_text: str) -> Dict[str, Any]:
         from beru.utils.helpers import extract_json
 
-        prompt = f"""You are BERU's File Agent - a helpful AI assistant for file operations.
+        lower_input = input_text.lower().strip()
 
-User request: {input_text}
+        greetings = [
+            "hi",
+            "hello",
+            "hlo",
+            "hey",
+            "hola",
+            "sup",
+            "yo",
+            "howdy",
+            "greetings",
+        ]
+        if (
+            any(g in lower_input.split() for g in greetings)
+            and len(lower_input.split()) <= 3
+        ):
+            return {
+                "action": "answer",
+                "final_answer": f"Hello! How can I help you today? I can assist with file operations, code, projects, and more!",
+            }
 
-Available tools (use EXACT action name):
-- action: "read_file" (params: {{"file_path": "path"}})
-- action: "write_file" (params: {{"file_path": "path", "content": "text"}})
-- action: "update_file" (params: {{"file_path": "path", "content": "text", "mode": "append|replace"}})
-- action: "list_directory" (params: {{"directory": "path", "recursive": false}})
-- action: "create_directory" (params: {{"directory_path": "path"}})
-- action: "delete_file" (params: {{"file_path": "path"}})
-- action: "search_files" (params: {{"pattern": "*.py", "directory": "path"}})
-- action: "summarize_folder" (params: {{"directory": "path"}})
-- action: "open_in_app" (params: {{"path": "path", "app": "code"}})
+        prompt = f"""You are BERU - a friendly AI assistant. You have file operation tools but you should ALSO be able to have normal conversations!
 
-IMPORTANT:
-- Use actual paths: /home/user171125/Downloads, /home/user171125/Documents
-- For conversation: use action "answer"
-- For file tasks: use appropriate tool
+User message: {input_text}
 
-Respond ONLY with valid JSON:
-{{"action": "answer", "final_answer": "your response"}}
-OR
-{{"action": "tool_name", "action_input": {{"param": "value"}}}}
+DECISION RULES:
+1. If this is a GREETING, QUESTION, or GENERAL CHAT (not about files):
+   → Respond with: {{"action": "answer", "final_answer": "your friendly response"}}
+   
+2. Only use tools when there's a CLEAR file operation request like:
+   - "read the file..."
+   - "list files in..."
+   - "create a folder..."
+   - "delete the file..."
+   - "search for files..."
+   - "summarize folder..."
+
+3. If unsure, prefer "answer" action and have a natural conversation.
+
+Examples of CONVERSATION (use action "answer"):
+- "hlo" → {{"action": "answer", "final_answer": "Hello! How can I help?"}}
+- "how are you" → {{"action": "answer", "final_answer": "I'm doing great! Ready to help!"}}
+- "what can you do" → {{"action": "answer", "final_answer": "I can help with files, code, projects..."}}
+- "thanks" → {{"action": "answer", "final_answer": "You're welcome!"}}
+
+Examples of FILE OPERATIONS (use tools):
+- "read config.py" → {{"action": "read_file", "action_input": {{"file_path": "/path/to/config.py"}}}}
+- "list files in Downloads" → {{"action": "list_directory", "action_input": {{"directory": "/home/user171125/Downloads"}}}}
+
+NOW, respond to: "{input_text}"
 
 JSON response:"""
 
@@ -483,11 +510,14 @@ JSON response:"""
                     "action": "answer",
                     "final_answer": response.text[:500]
                     if response.text
-                    else "I'm not sure.",
+                    else "I'm here to help! What would you like to do?",
                 }
             return parsed
         except Exception as e:
-            return {"action": "answer", "final_answer": f"Error: {e}"}
+            return {
+                "action": "answer",
+                "final_answer": f"I'm here to help! How can I assist you?",
+            }
 
     async def act(self, thought: Dict[str, Any]) -> ToolResult:
         action = thought.get("action", "answer")

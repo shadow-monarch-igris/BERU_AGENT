@@ -65,3 +65,29 @@
 2026-02-20 13:29:58,848 - beru.skills.loader - INFO - Loaded skill: Code Reviewer
 2026-02-20 13:29:58,848 - beru.skills.loader - INFO - Loaded skill: Web Researcher
 2026-02-20 13:29:58,848 - beru.skills.loader - INFO - Loaded skill: API Tester
+2026-02-20 14:36:04,331 - beru.plugins - INFO - Discovered 0 plugin files
+2026-02-20 14:36:04,331 - beru.plugins - INFO - Loaded 0 tools from 0 plugin files
+2026-02-20 14:36:04,333 - beru - INFO - Loaded agents: ['file_agent', 'terminal_agent', 'orchestrator', 'code_agent', 'project_agent', 'web_agent']
+2026-02-20 14:42:21,392 - beru.plugins - INFO - Discovered 0 plugin files
+2026-02-20 14:42:21,393 - beru.plugins - INFO - Loaded 0 tools from 0 plugin files
+2026-02-20 14:42:21,406 - beru - INFO - Loaded agents: ['file_agent', 'terminal_agent', 'orchestrator', 'code_agent', 'project_agent', 'web_agent']
+2026-02-20 14:43:05,202 - beru.plugins - INFO - Discovered 0 plugin files
+2026-02-20 14:43:05,202 - beru.plugins - INFO - Loaded 0 tools from 0 plugin files
+2026-02-20 14:43:05,204 - beru - INFO - Loaded agents: ['file_agent', 'terminal_agent', 'orchestrator', 'code_agent', 'project_agent', 'web_agent']
+2026-02-20 14:44:53,769 - beru.plugins - INFO - Discovered 0 plugin files
+2026-02-20 14:44:53,769 - beru.plugins - INFO - Loaded 0 tools from 0 plugin files
+2026-02-20 14:44:53,771 - beru - INFO - Loaded agents: ['file_agent', 'terminal_agent', 'orchestrator', 'code_agent', 'project_agent', 'web_agent']
+2026-02-20 14:46:06,018 - beru.plugins - INFO - Discovered 0 plugin files
+2026-02-20 14:46:06,018 - beru.plugins - INFO - Loaded 0 tools from 0 plugin files
+2026-02-20 14:46:06,020 - beru - INFO - Loaded agents: ['file_agent', 'terminal_agent', 'orchestrator', 'code_agent', 'project_agent', 'web_agent']
+2026-02-20 14:50:05,658 - beru.plugins - INFO - Discovered 0 plugin files
+2026-02-20 14:50:05,658 - beru.plugins - INFO - Loaded 0 tools from 0 plugin files
+2026-02-20 14:52:55,384 - beru.plugins - INFO - Discovered 0 plugin files
+2026-02-20 14:52:55,384 - beru.plugins - INFO - Loaded 0 tools from 0 plugin files
+2026-02-20 14:52:55,386 - beru - INFO - Loaded agents: ['file_agent', 'terminal_agent', 'orchestrator', 'code_agent', 'project_agent', 'web_agent']
+2026-02-20 14:55:11,838 - beru.plugins - INFO - Discovered 0 plugin files
+2026-02-20 14:55:11,838 - beru.plugins - INFO - Loaded 0 tools from 0 plugin files
+2026-02-20 14:55:11,845 - beru.skills.loader - INFO - Loaded skill: Data Analyst
+2026-02-20 14:55:11,845 - beru.skills.loader - INFO - Loaded skill: Code Reviewer
+2026-02-20 14:55:11,846 - beru.skills.loader - INFO - Loaded skill: Web Researcher
+2026-02-20 14:55:11,846 - beru.skills.loader - INFO - Loaded skill: API Tester
