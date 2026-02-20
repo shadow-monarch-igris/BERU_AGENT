@@ -1,16 +1,75 @@
-# BERU AI Assistant Available For Your Help 
+# 🚀 BERU AI Assistant Available For Your Help  
 
 Your personal AI assistant with comprehensive capabilities for file management, coding, web operations, project scaffolding, and more.
 
-## Features
+---
 
-### User Experience
+# 🔥 Why BERU Is Different (Fully Local Advantage)
+
+## 🔒 100% Fully Local — No Paid Models Required
+
+Most AI assistants:
+- Require paid APIs
+- Have monthly limits
+- Restrict advanced models
+- Cap token usage
+- Lock features behind subscriptions
+
+**BERU runs completely on your machine.**
+
+If a model exists locally, BERU can use it.
+
+Supported examples (via Ollama):
+- mistral
+- llama
+- codellama
+- phi
+- deepseek
+- any Ollama-supported local model
+
+### What This Means:
+
+- ❌ No API billing
+- ❌ No usage limits
+- ❌ No subscription dependency
+- ❌ No vendor lock-in
+- ❌ No cloud data exposure
+
+You control:
+- The model
+- The hardware
+- The privacy
+- The performance
+
+Your machine = your AI power.
+
+---
+
+# 🏆 Additional Advantages Over Other Assistants
+
+✅ Fully offline capability  
+✅ Unlimited usage (hardware dependent)  
+✅ Model-agnostic architecture  
+✅ True multi-agent system (not just chat wrapper)  
+✅ Dynamic skill injection  
+✅ System-level control (files + terminal + projects)  
+✅ Built-in safety enforcement  
+✅ Designed for developers, not casual users  
+
+---
+
+# ⚙️ Features
+
+## 👤 User Experience
+
 - **First-time Onboarding**: BERU greets you, learns about you, and saves your profile
 - **System Scanning**: Automatically detects your apps, languages, and projects
 - **Personalized Responses**: Uses your profile to tailor assistance
 - **Conversation Tracking**: Remembers your interactions
 
-### Multi-Agent Architecture
+---
+
+# 🤖 Multi-Agent Architecture
 
 | Agent | Purpose | Tools |
 |-------|---------|-------|
@@ -21,42 +80,83 @@ Your personal AI assistant with comprehensive capabilities for file management, 
 | `web_agent` | Web operations | search web, open websites, test APIs |
 | `orchestrator` | Multi-agent coordination | coordinates other agents for complex tasks |
 
-### Skills System
+Each agent has bounded responsibility and dedicated tools — making BERU modular and production-ready.
+
+---
+
+# 🧩 Skills System
+
 Dynamically loadable skills from markdown files:
+
 - Code Reviewer
 - Data Analyst
 - Web Researcher
 - API Tester
-- Add your own custom skills with simple commands!
+- Create your own custom skills instantly
 
-### File Operations
+Add skill example:
+
+```
+beru> add skill email_sender
+```
+
+Skill loads instantly — no restart required.
+
+---
+
+# 📂 File Operations
+
 - Read/write/update/delete files
 - List directories with details
 - Search files by pattern
 - Summarize folder contents
 - Open files in VS Code, browser, or any app
 
-### Project Scaffolding
+---
+
+# 🏗️ Project Scaffolding
+
 Create complete project structures:
+
 - FastAPI projects
 - Flask projects
 - Python packages
 - Node.js APIs
 - React apps
 
-### Code Features
-- Write code with proper structure
-- Review code for bugs and issues
-- Security analysis
-- Generate documentation
+Includes folder structure, boilerplate, and base setup.
 
-### Web Features
+---
+
+# 🧠 Code Features
+
+- Write structured production-ready code
+- Review code for bugs
+- Perform security analysis
+- Generate documentation
+- Refactor intelligently
+
+---
+
+# 🌐 Web Features
+
 - Search the web
 - Open websites in browser
 - Test REST APIs
 - Fetch URL content
 
-## Installation
+---
+
+# 🖥️ Terminal Operations
+
+- Execute system commands
+- Run scripts
+- Git operations
+- Inspect environment
+
+---
+
+# 📦 Installation
 
 ```bash
 # Navigate to BERU directory
@@ -72,19 +172,25 @@ ollama serve
 ollama pull mistral
 ```
 
-## Quick Start
+---
 
-### CLI Mode
+# 🚀 Quick Start
+
+## CLI Mode
+
 ```bash
 python -m beru.main
 ```
 
-### API Server Mode
+## API Server Mode
+
 ```bash
 python -m beru.main --server --port 8080
 ```
 
-## Commands
+---
+
+# 🧾 Commands
 
 ```
 help              Show help
@@ -99,9 +205,12 @@ profile           View your profile
 rescan            Rescan system for changes
 ```
 
-## Usage Examples
+---
 
-### File Operations
+# 💡 Usage Examples
+
+## File Operations
+
 ```
 beru> list files in /home/user171125/Documents
 beru> read the file /home/user171125/Documents/notes.txt
@@ -112,7 +221,10 @@ beru> search for all Python files in Documents
 beru> update the file config.py with "# Added by BERU"
 ```
 
-### Project Creation
+---
+
+## Project Creation
+
 ```
 beru> agent project_agent
 beru> create a FastAPI project called my_api in Downloads
@@ -120,7 +232,10 @@ beru> create a Flask project called webapp
 beru> create a Python package called mylib
 ```
 
-### Code Operations
+---
+
+## Code Operations
+
 ```
 beru> agent code_agent
 beru> write a Python function to fetch data from an API
@@ -129,7 +244,10 @@ beru> analyze security issues in auth.py
 beru> generate documentation for main.py
 ```
 
-### Web Operations
+---
+
+## Web Operations
+
 ```
 beru> agent web_agent
 beru> search for Python best practices
@@ -138,7 +256,10 @@ beru> test the API at https://api.example.com/users
 beru> fetch content from example.com
 ```
 
-### Terminal Operations
+---
+
+## Terminal Operations
+
 ```
 beru> agent terminal_agent
 beru> show current directory
@@ -146,14 +267,9 @@ beru> list all files with details
 beru> run git status
 ```
 
-### Add Custom Skills
-```
-beru> add skill email_sender
-  Description: Send emails to users
-  # Skill is created automatically and ready to use!
-```
+---
 
-## Configuration
+# ⚙️ Configuration
 
 Edit `config.yaml`:
 
@@ -180,103 +296,94 @@ api:
   port: 8080
 ```
 
-## Project Structure
+---
+
+# 🧬 Project Structure
 
 ```
 beru/
-├── agents/           # Specialized agents
+├── agents/
 │   ├── file_agent.py
 │   ├── code_agent.py
 │   ├── project_agent.py
 │   ├── web_agent.py
 │   ├── terminal_agent.py
 │   └── orchestrator.py
-├── core/             # Core components
-│   ├── agent.py      # Base agent class
-│   ├── llm.py        # LLM client
-│   ├── profile.py    # User profile manager
-│   ├── onboarding.py # First-time setup
-│   └── workflow.py   # Workflow engine
-├── services/         # Utility services
+├── core/
+│   ├── agent.py
+│   ├── llm.py
+│   ├── profile.py
+│   ├── onboarding.py
+│   └── workflow.py
+├── services/
 │   └── system_scanner.py
-├── skills/           # Dynamic skills
-│   ├── templates/    # Default skills
-│   └── custom/       # User-added skills
-├── plugins/          # Plugin system
-├── safety/           # Safety features
-├── api/              # REST API server
-└── main.py           # Entry point
+├── skills/
+│   ├── templates/
+│   └── custom/
+├── plugins/
+├── safety/
+├── api/
+└── main.py
 ```
 
-## Safety Features
+---
 
-BERU blocks dangerous operations:
-- Blocks `rm -rf /` and similar commands
+# 🛡️ Safety Features
+
+- Blocks `rm -rf /`
 - Validates file paths
 - Requires confirmation for dangerous operations
-- Logs all operations for audit
+- Logs operations for audit
+- Sandbox protection
 
-## Python API
+---
+
+# 🧪 Python API
 
 ```python
 import asyncio
 from beru import AgentFactory
 
-# Create an agent
 agent = AgentFactory.create('file_agent')
-
-# Run a task
 response = asyncio.run(agent.run('List all Python files'))
 print(response)
 
-# Switch agents
 code_agent = AgentFactory.create('code_agent')
 response = asyncio.run(code_agent.run('Write a hello world function'))
 ```
 
-## REST API
+---
+
+# 🌍 REST API
 
 ```bash
-# Health check
 curl http://localhost:8080/api/health
-
-# List agents
 curl http://localhost:8080/api/agents
 
-# Chat with agent
 curl -X POST http://localhost:8080/api/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "List files", "agent": "file_agent"}'
 ```
 
-## Requirements
+---
+
+# 📌 Requirements
 
 - Python 3.8+
-- Ollama (for local LLM)
-- See requirements.txt for dependencies
-
-## Troubleshooting
-
-### Ollama not found
-```bash
-ollama serve
-ollama list
-```
-
-### Model not found
-```bash
-ollama pull mistral
-```
-
-### Import errors
-```bash
-pip install pyyaml aiohttp chromadb
-```
-
-## License
-
-MIT License - Use freely for any purpose.
+- Ollama
+- Local LLM
+- Dependencies from requirements.txt
 
 ---
 
-**Built by sHiVaM AI/ML DEVELOPER. Powered by local LLMs via Ollama.**
+# 📜 License
+
+MIT License — Free for personal and commercial use.
+
+---
+
+**Built by sHiVaM AI/ML Developer**  
+**Powered entirely by Local LLMs via Ollama**
+
+If you want complete control over your AI stack —  
+BERU is your foundation.
