@@ -250,28 +250,26 @@ class WebAgent(BaseAgent):
     async def think(self, input_text: str) -> Dict[str, Any]:
         from beru.utils.helpers import extract_json
 
-        prompt = f"""You are BERU's Web Agent - an expert in web operations and API testing.
+        prompt = f"""You are BERU's Web Agent. You MUST use the open_website tool for opening websites!
 
 User request: {input_text}
 
-Available tools (use the EXACT action name):
-- action: "web_search" - Search web (params: {{"query": "search query", "num_results": 5}})
-- action: "open_website" - Open in browser (params: {{"url": "example.com", "browser": "default"}})
-- action: "test_api" - Test API (params: {{"url": "https://api.example.com", "method": "GET", "headers": {{}}, "body": {{}}}})
-- action: "fetch_url" - Fetch URL content (params: {{"url": "https://example.com"}})
+IMPORTANT: Use ONLY these tools:
+1. open_website - For opening websites (youtube, google, etc.)
+   Required parameter: url (not path!)
+   
+2. web_search - For searching web
+   Required parameter: query
 
-Guidelines:
-- For general questions: use action "answer"
-- For web operations: use appropriate tool
-- Be helpful with API testing
-- Suggest best practices
+CORRECT EXAMPLES:
+"open youtube" -> {{"action": "open_website", "action_input": {{"url": "https://youtube.com"}}}}
+"open youtube in chrome" -> {{"action": "open_website", "action_input": {{"url": "https://youtube.com", "browser": "chrome"}}}}
+"open google" -> {{"action": "open_website", "action_input": {{"url": "https://google.com"}}}}
+"search python tutorials" -> {{"action": "web_search", "action_input": {{"query": "python tutorials"}}}}
 
-Respond ONLY with valid JSON:
-{{"action": "answer", "final_answer": "your response"}}
-OR
-{{"action": "tool_name", "action_input": {{"param": "value"}}}}
+For questions -> {{"action": "answer", "final_answer": "response"}}
 
-JSON response:"""
+Respond with ONLY JSON:"""
 
         try:
             response = await self.llm.generate(prompt, max_tokens=500, temperature=0.3)
@@ -279,7 +277,7 @@ JSON response:"""
             if not parsed:
                 parsed = {
                     "action": "answer",
-                    "final_answer": response.text[:500]
+                    "final_answer": response.text
                     if response.text
                     else "I'm not sure how to help.",
                 }

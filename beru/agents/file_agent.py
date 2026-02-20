@@ -424,10 +424,57 @@ class UpdateFileTool(Tool):
             return ToolResult(success=False, output=None, error=str(e))
 
 
+class OpenWebsiteTool(Tool):
+    name = "open_website"
+    description = "Open a website in browser"
+    tool_type = ToolType.UTILITY
+    parameters = [
+        ToolParameter(
+            name="url", type="string", description="Website URL", required=True
+        ),
+        ToolParameter(
+            name="browser",
+            type="string",
+            description="Browser (chrome, firefox)",
+            required=False,
+            default="default",
+        ),
+    ]
+
+    async def execute(self, **kwargs) -> ToolResult:
+        import webbrowser
+
+        url = kwargs.get("url", "")
+        browser = kwargs.get("browser", "default")
+
+        try:
+            if not url.startswith(("http://", "https://")):
+                url = "https://" + url
+
+            # Add .com if it's just a domain name
+            if "." not in url.split("//")[-1]:
+                url = url + ".com"
+
+            if browser == "default":
+                webbrowser.open(url)
+            else:
+                browsers = {
+                    "chrome": "google-chrome",
+                    "firefox": "firefox",
+                    "chromium": "chromium-browser",
+                }
+                cmd = browsers.get(browser, browser)
+                subprocess.Popen([cmd, url], start_new_session=True)
+
+            return ToolResult(success=True, output=f"Opened {url} in {browser} browser")
+        except Exception as e:
+            return ToolResult(success=False, output=None, error=str(e))
+
+
 @agent
 class FileAgent(BaseAgent):
     name = "file_agent"
-    description = "Enhanced agent for file system operations"
+    description = "Enhanced agent for file system operations and web"
     agent_type = "file"
     tools = [
         ReadFileTool,
@@ -439,6 +486,7 @@ class FileAgent(BaseAgent):
         SummarizeFolderTool,
         OpenInAppTool,
         UpdateFileTool,
+        OpenWebsiteTool,
     ]
 
     def __init__(self, agent_id: Optional[str] = None):
@@ -470,54 +518,180 @@ class FileAgent(BaseAgent):
                 "final_answer": f"Hello! How can I help you today? I can assist with file operations, code, projects, and more!",
             }
 
-        prompt = f"""You are BERU - a friendly AI assistant. You have file operation tools but you should ALSO be able to have normal conversations!
+        # Handle website opening - extract website name properly
+        known_websites = [
+            "youtube",
+            "google",
+            "github",
+            "leetcode",
+            "udemy",
+            "stackoverflow",
+            "reddit",
+            "facebook",
+            "twitter",
+            "linkedin",
+            "instagram",
+            "amazon",
+            "netflix",
+            "gmail",
+            "outlook",
+            "spotify",
+            "discord",
+            "slack",
+        ]
 
-User message: {input_text}
+        if "open" in lower_input:
+            # Handle YouTube with search/channel
+            if "youtube" in lower_input:
+                # Extract search terms
+                text_after_youtube = lower_input.split("youtube")[-1].strip()
+                text_after_youtube = (
+                    text_after_youtube.replace("channel", "").replace("on", "").strip()
+                )
 
-DECISION RULES:
-1. If this is a GREETING, QUESTION, or GENERAL CHAT (not about files):
-   → Respond with: {{"action": "answer", "final_answer": "your friendly response"}}
-   
-2. Only use tools when there's a CLEAR file operation request like:
-   - "read the file..."
-   - "list files in..."
-   - "create a folder..."
-   - "delete the file..."
-   - "search for files..."
-   - "summarize folder..."
+                if text_after_youtube and len(text_after_youtube) > 0:
+                    # Open with search
+                    search_query = text_after_youtube.replace(" ", "+")
+                    url = f"https://www.youtube.com/results?search_query={search_query}"
+                else:
+                    url = "https://youtube.com"
 
-3. If unsure, prefer "answer" action and have a natural conversation.
+                return {
+                    "action": "open_website",
+                    "action_input": {"url": url},
+                }
 
-Examples of CONVERSATION (use action "answer"):
-- "hlo" → {{"action": "answer", "final_answer": "Hello! How can I help?"}}
-- "how are you" → {{"action": "answer", "final_answer": "I'm doing great! Ready to help!"}}
-- "what can you do" → {{"action": "answer", "final_answer": "I can help with files, code, projects..."}}
-- "thanks" → {{"action": "answer", "final_answer": "You're welcome!"}}
+            # Check other known websites
+            for site in known_websites:
+                if site in lower_input:
+                    browser = "default"
+                    if "chrome" in lower_input:
+                        browser = "chrome"
+                    elif "firefox" in lower_input:
+                        browser = "firefox"
+                    return {
+                        "action": "open_website",
+                        "action_input": {"url": site, "browser": browser},
+                    }
 
-Examples of FILE OPERATIONS (use tools):
-- "read config.py" → {{"action": "read_file", "action_input": {{"file_path": "/path/to/config.py"}}}}
-- "list files in Downloads" → {{"action": "list_directory", "action_input": {{"directory": "/home/user171125/Downloads"}}}}
+        conversation_history = self._build_conversation_context()
 
-NOW, respond to: "{input_text}"
+        prompt = f"""You are BERU, a helpful AI assistant. Use tools for operations!
 
-JSON response:"""
+{conversation_history}
+
+User: {input_text}
+
+TOOLS:
+- open_website: Open websites (youtube, google) - params: {{"url": "youtube.com"}}
+- search_files: Find files - params: {{"pattern": "*name*", "directory": "/home/user171125/Documents"}}
+- list_directory: List folders - params: {{"directory": "/path"}}
+- read_file: Read files - params: {{"file_path": "/path/file"}}
+- open_in_app: Open files in apps - params: {{"path": "/path", "app": "code"}}
+
+EXAMPLES:
+"open youtube" -> {{"action": "open_website", "action_input": {{"url": "https://youtube.com"}}}}
+"open google in chrome" -> {{"action": "open_website", "action_input": {{"url": "https://google.com", "browser": "chrome"}}}}
+"search mosaic in documents" -> {{"action": "search_files", "action_input": {{"pattern": "*mosaic*", "directory": "/home/user171125/Documents"}}}}
+"read app.py" -> {{"action": "read_file", "action_input": {{"file_path": "/path/from/context/app.py"}}}}
+
+Respond with JSON only:"""
 
         try:
-            response = await self.llm.generate(prompt, max_tokens=500, temperature=0.3)
+            response = await self.llm.generate(prompt, max_tokens=1500, temperature=0.3)
             parsed = extract_json(response.text)
             if not parsed:
                 parsed = {
                     "action": "answer",
-                    "final_answer": response.text[:500]
+                    "final_answer": response.text
                     if response.text
-                    else "I'm here to help! What would you like to do?",
+                    else "I'm here to help!",
                 }
             return parsed
         except Exception as e:
             return {
                 "action": "answer",
-                "final_answer": f"I'm here to help! How can I assist you?",
+                "final_answer": "I'm here to help! How can I assist you?",
             }
+
+        try:
+            response = await self.llm.generate(prompt, max_tokens=1500, temperature=0.3)
+            parsed = extract_json(response.text)
+            if not parsed:
+                parsed = {
+                    "action": "answer",
+                    "final_answer": response.text
+                    if response.text
+                    else "I'm here to help!",
+                }
+            return parsed
+        except Exception as e:
+            return {
+                "action": "answer",
+                "final_answer": "I'm here to help! How can I assist you?",
+            }
+
+        conversation_history = self._build_conversation_context()
+
+        prompt = f"""You are BERU, a helpful AI assistant. Give COMPLETE and DETAILED responses.
+
+{conversation_history}
+
+User: {input_text}
+
+Rules:
+- For questions/explanations → use action "answer" and provide FULL detailed response
+- For file operations → use tools with paths like /home/user171125/Documents/...
+- Give COMPLETE answers, do not cut off mid-sentence
+
+Respond with JSON:
+{{"action": "answer", "final_answer": "your complete detailed response here"}}"""
+
+        try:
+            response = await self.llm.generate(prompt, max_tokens=1500, temperature=0.5)
+            parsed = extract_json(response.text)
+            if not parsed:
+                parsed = {
+                    "action": "answer",
+                    "final_answer": response.text
+                    if response.text
+                    else "I'm here to help!",
+                }
+            return parsed
+        except Exception as e:
+            return {
+                "action": "answer",
+                "final_answer": "I'm here to help! How can I assist you?",
+            }
+            return parsed
+        except Exception as e:
+            return {
+                "action": "answer",
+                "final_answer": "I'm here to help! How can I assist you?",
+            }
+
+    def _build_conversation_context(self, limit: int = 10) -> str:
+        history = self.context.get_history(limit)
+        if not history:
+            return "CONVERSATION HISTORY: (This is the start of our conversation)"
+
+        context_lines = ["CONVERSATION HISTORY:"]
+        for msg in history:
+            role = msg.role.upper()
+            content = msg.content
+            if role == "USER":
+                context_lines.append(f"User: {content}")
+            elif role == "ASSISTANT":
+                # For tool results, show full content so LLM can use the paths!
+                if "[" in content and "{" in content:
+                    context_lines.append(f"BERU found: {content}")
+                else:
+                    context_lines.append(f"BERU: {content[:300]}...")
+            elif role == "TOOL":
+                context_lines.append(f"[Tool result: {content[:200]}...]")
+
+        context_lines.append("")
+        return "\n".join(context_lines)
 
     async def act(self, thought: Dict[str, Any]) -> ToolResult:
         action = thought.get("action", "answer")

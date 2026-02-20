@@ -1,21 +1,21 @@
 # User Profile
 
 ## Personal Information
-- **Name**: TestUser
-- **Role**: Developer
+- **Name**: shivam
+- **Role**: AI/ML Developer
 - **Experience Level**: 
 
 ## Projects & Work
-- **Current Projects**: None specified
-- **Preferred Programming Language**: 
+- **Current Projects**: BERU_AGENT
+- **Preferred Programming Language**: python
 - **Frameworks Used**: None specified
 
 ## Preferences
-- **Code Editor**: VS Code
-- **Interests**: None specified
+- **Code Editor**: vs code
+- **Interests**: AI agent development
 - **Goals**: None specified
 
 ## Statistics
 - **Profile Created**: 2026-02-20T00:00:00
-- **Last Active**: 2026-02-20T14:52:55.388558
-- **Total Interactions**: 16
+- **Last Active**: 2026-02-20T18:13:53.722401
+- **Total Interactions**: 47

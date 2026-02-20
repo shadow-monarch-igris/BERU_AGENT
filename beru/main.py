@@ -34,7 +34,7 @@ def setup() -> None:
 
 def print_banner():
     print("\n" + "=" * 60)
-    print("  BERU 2.0 - Your Dream AI Assistant")
+    print("  BERU - AI Assistant")
     print("=" * 60)
 
 
@@ -44,13 +44,23 @@ Commands:
   help              Show this help
   exit, quit, q     Exit the assistant
   clear             Clear conversation history
+  
+Agents:
   agent <name>      Switch to a different agent
   agents            List available agents
+  
+Skills:
   skills            List available skills
-  add skill         Add a new skill
+  add skill <name>  Add a new skill
+  
+Profile:
+  profile           View your profile
+  edit profile      Edit your profile
+  
+System:
   status            Show current status
-  profile           View/edit your profile
   rescan            Rescan system for changes
+  system info       View system information
 
 Or just type your message and BERU will help you!
 """)
@@ -136,8 +146,96 @@ def run_cli() -> None:
                 for s in skills:
                     skill = loader.get_skill(s)
                     if skill:
-                        print(f"    - {skill.name}: {skill.description[:50]}...")
+                        desc = (
+                            skill.description
+                            if skill.description
+                            else f"Help with {skill.name.lower()} tasks"
+                        )
+                        triggers = (
+                            ", ".join(skill.triggers[:3])
+                            if skill.triggers
+                            else "ask about " + skill.name.lower()
+                        )
+                        print(f"    - {skill.name}")
+                        print(f"      {desc}")
+                        print(f"      Triggers: {triggers}\n")
                 print()
+                continue
+
+            if user_input.lower() in ["view profile", "profile"]:
+                if profile:
+                    print(f"\n  Your Profile:\n")
+                    print(f"    Name: {profile.name}")
+                    print(f"    Role: {profile.role}")
+                    print(f"    Experience: {profile.experience_level}")
+                    print(f"    Language: {profile.preferred_language}")
+                    print(f"    Editor: {profile.preferred_editor}")
+                    print(
+                        f"    Projects: {', '.join(profile.projects) if profile.projects else 'None'}"
+                    )
+                    print(
+                        f"    Frameworks: {', '.join(profile.frameworks) if profile.frameworks else 'None'}"
+                    )
+                    print(
+                        f"    Interests: {', '.join(profile.interests) if profile.interests else 'None'}"
+                    )
+                    print(
+                        f"    Goals: {', '.join(profile.goals) if profile.goals else 'None'}\n"
+                    )
+                else:
+                    print("\n  No profile found. Run onboarding first.\n")
+                continue
+
+            if user_input.lower() == "edit profile":
+                if not profile:
+                    print("\n  No profile found. Run onboarding first.\n")
+                    continue
+
+                print("\n  Edit Profile (leave blank to keep current value):\n")
+
+                # Edit name
+                new_name = input(f"  Name [{profile.name}]: ").strip()
+                if new_name:
+                    profile.name = new_name
+
+                # Edit role
+                new_role = input(f"  Role [{profile.role}]: ").strip()
+                if new_role:
+                    profile.role = new_role
+
+                # Edit language
+                new_lang = input(
+                    f"  Preferred Language [{profile.preferred_language}]: "
+                ).strip()
+                if new_lang:
+                    profile.preferred_language = new_lang
+
+                # Edit editor
+                new_editor = input(f"  Editor [{profile.preferred_editor}]: ").strip()
+                if new_editor:
+                    profile.preferred_editor = new_editor
+
+                # Edit projects
+                current_projects = (
+                    ", ".join(profile.projects) if profile.projects else ""
+                )
+                new_projects = input(f"  Projects [{current_projects}]: ").strip()
+                if new_projects:
+                    profile.projects = [p.strip() for p in new_projects.split(",")]
+
+                # Edit interests
+                current_interests = (
+                    ", ".join(profile.interests) if profile.interests else ""
+                )
+                new_interests = input(f"  Interests [{current_interests}]: ").strip()
+                if new_interests:
+                    profile.interests = [i.strip() for i in new_interests.split(",")]
+
+                # Save profile
+                from beru.core.profile import ProfileManager
+
+                ProfileManager().save(profile)
+                print("\n  Profile updated successfully!\n")
                 continue
 
             if user_input.lower().startswith("add skill"):
@@ -170,30 +268,6 @@ def run_cli() -> None:
                 print()
                 continue
 
-            if user_input.lower() == "profile":
-                if profile:
-                    print(f"\n  Your Profile:\n")
-                    print(f"    Name: {profile.name}")
-                    print(f"    Role: {profile.role}")
-                    print(f"    Experience: {profile.experience_level}")
-                    print(f"    Language: {profile.preferred_language}")
-                    print(f"    Editor: {profile.preferred_editor}")
-                    print(
-                        f"    Projects: {', '.join(profile.projects) if profile.projects else 'None'}"
-                    )
-                    print(
-                        f"    Frameworks: {', '.join(profile.frameworks) if profile.frameworks else 'None'}"
-                    )
-                    print(
-                        f"    Interests: {', '.join(profile.interests) if profile.interests else 'None'}"
-                    )
-                    print(
-                        f"    Goals: {', '.join(profile.goals) if profile.goals else 'None'}\n"
-                    )
-                else:
-                    print("\n  No profile found. Run onboarding first.\n")
-                continue
-
             if user_input.lower() == "rescan":
                 from beru.services.system_scanner import SystemScanner
 
@@ -203,6 +277,42 @@ def run_cli() -> None:
                 print(
                     f"  Scan complete. Found {len(scan_data.get('recent_projects', []))} projects.\n"
                 )
+                continue
+
+            if user_input.lower() == "system info":
+                from beru.services.system_scanner import SystemScanner
+                import json
+
+                scanner = SystemScanner()
+                data = scanner.load()
+
+                if data:
+                    print("\n  System Information:\n")
+                    sys_info = data.get("system", {})
+                    print(f"    OS: {sys_info.get('os', 'Unknown')}")
+                    print(f"    Distro: {sys_info.get('distro', 'Unknown')}")
+                    print(f"    Username: {sys_info.get('username', 'Unknown')}")
+                    print(f"    Home: {sys_info.get('home_dir', 'Unknown')}")
+
+                    print("\n  Installed Languages:")
+                    for lang, info in data.get("languages", {}).items():
+                        print(f"    - {lang}: v{info.get('version', 'unknown')}")
+
+                    print("\n  Installed Apps:")
+                    apps = data.get("installed_apps", {})
+                    for category, app_list in apps.items():
+                        if app_list:
+                            names = [a.get("name") for a in app_list]
+                            print(f"    {category}: {', '.join(names[:5])}")
+
+                    print("\n  Recent Projects:")
+                    for proj in data.get("recent_projects", [])[:5]:
+                        print(
+                            f"    - {proj.get('name', 'Unknown')} ({proj.get('type', 'unknown')})"
+                        )
+                    print()
+                else:
+                    print("\n  No system data found. Run 'rescan' first.\n")
                 continue
 
             if user_input.lower().startswith("agent "):

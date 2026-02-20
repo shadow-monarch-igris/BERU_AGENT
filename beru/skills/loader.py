@@ -39,24 +39,38 @@ class SkillLoader:
                 name = line[2:].strip()
             elif line.startswith("## "):
                 if current_section and section_content:
-                    self._process_section(current_section, section_content, locals())
+                    result = self._process_section(current_section, section_content)
+                    if result:
+                        section_name, section_value = result
+                        if section_name == "description":
+                            description = section_value
+                        elif section_name == "instructions":
+                            instructions = section_value
+                        elif section_name == "tools":
+                            tools = section_value
+                        elif section_name == "triggers":
+                            triggers = section_value
+                        elif section_name == "examples":
+                            examples = section_value
                 current_section = line[3:].strip().lower()
                 section_content = []
             else:
                 section_content.append(line)
 
         if current_section and section_content:
-            self._process_section(
-                current_section,
-                section_content,
-                {
-                    "tools": tools,
-                    "triggers": triggers,
-                    "examples": examples,
-                    "instructions": instructions,
-                    "description": description,
-                },
-            )
+            result = self._process_section(current_section, section_content)
+            if result:
+                section_name, section_value = result
+                if section_name == "description":
+                    description = section_value
+                elif section_name == "instructions":
+                    instructions = section_value
+                elif section_name == "tools":
+                    tools = section_value
+                elif section_name == "triggers":
+                    triggers = section_value
+                elif section_name == "examples":
+                    examples = section_value
 
         if not name:
             name = filename.replace(".md", "").replace("_", " ").title()
@@ -70,36 +84,41 @@ class SkillLoader:
             examples=examples,
         )
 
-    def _process_section(self, section: str, content: List[str], data: Dict):
+    def _process_section(self, section: str, content: List[str]) -> Optional[tuple]:
         content_text = "\n".join(content).strip()
 
         if section in ["description", "about"]:
-            data["description"] = content_text
+            return ("description", content_text)
         elif section in ["instructions", "how to use", "guidelines"]:
-            data["instructions"] = content_text
+            return ("instructions", content_text)
         elif section in ["tools", "required tools"]:
+            tools = []
             for line in content:
                 line = line.strip()
                 if line.startswith("- ") or line.startswith("* "):
                     tool_name = line[2:].strip()
                     if tool_name:
-                        data["tools"].append(tool_name)
+                        tools.append(tool_name)
+            return ("tools", tools)
         elif section in ["triggers", "trigger words", "keywords"]:
+            triggers = []
             for line in content:
                 line = line.strip()
                 if line.startswith("- ") or line.startswith("* "):
                     trigger = line[2:].strip().lower()
                     if trigger:
-                        data["triggers"].append(trigger)
+                        triggers.append(trigger)
+            return ("triggers", triggers)
         elif section in ["examples", "example"]:
+            examples = []
             current_input = ""
             current_output = ""
             for line in content:
                 line = line.strip()
                 if line.lower().startswith("input:"):
                     if current_input and current_output:
-                        data["examples"].append(
-                            {"input": current_input, "output": current_output}
+                        examples.append(
+                            {"input": current_input, "output": current_output.strip()}
                         )
                     current_input = line[6:].strip()
                     current_output = ""
@@ -109,9 +128,12 @@ class SkillLoader:
                     current_output += line + "\n"
 
             if current_input and current_output:
-                data["examples"].append(
+                examples.append(
                     {"input": current_input, "output": current_output.strip()}
                 )
+            return ("examples", examples)
+
+        return None
 
     def load_skill(self, path: Path) -> Optional[Skill]:
         try:

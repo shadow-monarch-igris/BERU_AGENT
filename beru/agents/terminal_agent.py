@@ -177,15 +177,21 @@ For terminal operations (examples):
 JSON response:"""
 
         try:
-            response = await self.llm.generate(prompt, max_tokens=500, temperature=0.3)
+            response = await self.llm.generate(prompt, max_tokens=1500, temperature=0.5)
             parsed = extract_json(response.text)
             if not parsed:
                 parsed = {
                     "action": "answer",
-                    "final_answer": response.text[:500]
+                    "final_answer": response.text
                     if response.text
                     else "I'm not sure what you want me to do.",
                 }
+            return parsed
+        except Exception as e:
+            return {
+                "action": "answer",
+                "final_answer": f"I encountered an error: {e}. Please try again.",
+            }
             return parsed
         except Exception as e:
             return {
